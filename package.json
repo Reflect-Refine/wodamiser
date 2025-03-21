@@ -1,7 +1,8 @@
 {
-  "name": "crossfit-wod-randomiser",
+  "name": "wodamiser",
   "version": "1.0.0",
   "private": true,
+  "homepage": "https://Reflect-Refine.github.io/wodamiser",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -15,7 +16,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -37,6 +40,7 @@
   "devDependencies": {
     "tailwindcss": "^3.3.0",
     "postcss": "^8.4.31",
-    "autoprefixer": "^10.4.16"
+    "autoprefixer": "^10.4.16",
+    "gh-pages": "^6.0.0"
   }
 }
