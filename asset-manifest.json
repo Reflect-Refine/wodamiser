@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/wodamiser/static/css/main.55322452.css",
+    "main.js": "/wodamiser/static/js/main.48f16782.js",
+    "index.html": "/wodamiser/index.html",
+    "main.55322452.css.map": "/wodamiser/static/css/main.55322452.css.map",
+    "main.48f16782.js.map": "/wodamiser/static/js/main.48f16782.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.55322452.css",
+    "static/js/main.48f16782.js"
+  ]
+}
