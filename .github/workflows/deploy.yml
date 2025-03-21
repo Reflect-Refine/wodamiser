@@ -22,7 +22,9 @@ jobs:
           npm install
           npm ci
       - name: Build
-        run: npm run build
+        run: |
+          npm run build
+          touch build/.nojekyll
         env:
           CI: false
       - name: Check build output
