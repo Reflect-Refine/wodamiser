@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="description" content="CrossFit WOD Randomiser - Generate random workouts with customisable options" />
+    
+    <!-- PWA icons -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/icons/icon-192x192.png" />
+    <link rel="maskable-icon" href="%PUBLIC_URL%/icons/maskable_icon.png" />
+    
+    <!-- PWA manifest -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Apple specific PWA meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="WOD Randomiser" />
+    
+    <title>CrossFit WOD Randomiser</title>
+    
+    <style>
+      /* Initial loading spinner */
+      .app-loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: #f9fafb;
+      }
+      
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #e5e7eb;
+        border-top-color: #2563eb;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      .loading-text {
+        margin-top: 1rem;
+        font-family: system-ui, -apple-system, sans-serif;
+        color: #4b5563;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    
+    <div id="root">
+      <!-- Initial loading state -->
+      <div class="app-loading">
+        <div class="spinner"></div>
+        <p class="loading-text">Loading WOD Randomiser...</p>
+      </div>
+    </div>
+    
+    <!-- PWA install prompt script -->
+    <script>
+      // Check if the app is already installed
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        // App is already installed, don't show install prompt
+      } else {
+        // Add event listener for beforeinstallprompt
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+          // Prevent Chrome 67+ from automatically showing the prompt
+          e.preventDefault();
+          
+          // Stash the event so it can be triggered later
+          deferredPrompt = e;
+          
+          // After app loads completely, show install button
+          setTimeout(() => {
+            showInstallButton();
+          }, 5000);
+        });
+        
+        function showInstallButton() {
+          if (!deferredPrompt) return;
+          
+          const installButton = document.createElement('button');
+          installButton.innerText = 'Install App';
+          installButton.className = 'install-button';
+          installButton.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+          `;
+          
+          // Add install icon
+          installButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Install App
+          `;
+          
+          installButton.addEventListener('click', (e) => {
+            // Hide the install button
+            installButton.style.display = 'none';
+            
+            // Show the install prompt
+            deferredPrompt.prompt();
+            
+            // Wait for the user to respond to the prompt
+            deferredPrompt.userChoice.then((choiceResult) => {
+              if (choiceResult.outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+              } else {
+                console.log('User dismissed the install prompt');
+                // Show the button again after a brief delay
+                setTimeout(() => {
+                  installButton.style.display = 'flex';
+                }, 10000);
+              }
+              deferredPrompt = null;
+            });
+          });
+          
+          document.body.appendChild(installButton);
+        }
+      }
+    </script>
+  </body>
+</html>
