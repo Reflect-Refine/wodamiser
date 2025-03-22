@@ -1,3 +1,4 @@
+import Papa from 'papaparse';
 import React, { useState, useEffect } from 'react';
 import { Filter, Home, Clock, History, Settings, Dumbbell } from 'lucide-react';
 import defaultWorkouts from './data/workouts';
@@ -49,15 +50,64 @@ const CrossFitRandomiser = ({ externalWorkouts }) => {
   }, []);
 
   // Merge external workouts with built-in workouts if available
-  useEffect(() => {
-    if (externalWorkouts) {
-      setWorkoutsDatabase(prevDb => ({
-        regular: [...prevDb.regular, ...externalWorkouts.regular],
-        hyrox: [...prevDb.hyrox, ...externalWorkouts.hyrox],
-        intense: [...prevDb.intense, ...externalWorkouts.intense]
-      }));
-    }
-  }, [externalWorkouts]);
+useEffect(() => {
+  const sheetUrl = process.env.REACT_APP_GOOGLE_SHEETS_URL;
+
+  if (!sheetUrl) {
+    console.warn("⚠️ No sheet URL defined");
+    return;
+  }
+
+  fetch(sheetUrl)
+    .then(res => res.text())
+    .then(csv => {
+      Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+          const rows = results.data;
+
+          const grouped = {
+            regular: [],
+            hyrox: [],
+            intense: []
+          };
+
+          rows.forEach(row => {
+            const mode = (row.Category || 'regular').toLowerCase();
+            if (grouped[mode]) {
+              // Parse semicolon-separated movements into array
+              const parsedMovements = (row.Movements || '').split(';').map(m => m.trim());
+              grouped[mode].push({
+                name: row.Name,
+                description: row.Description,
+                type: row.Type,
+                movements: parsedMovements,
+                difficulty: row.Difficulty,
+                estimatedTime: row.EstimatedTime,
+                has_video: row.has_video === 'TRUE' || row.has_video === true,
+                videoUrl: row.videoUrl || '',
+                thumbnail: row.thumbnail || '',
+                posted_by: row.posted_by || '',
+                url: row.URL || ''
+              });
+            }
+          });
+
+          setWorkoutsDatabase(prevDb => ({
+            regular: [...prevDb.regular, ...grouped.regular],
+            hyrox: [...prevDb.hyrox, ...grouped.hyrox],
+            intense: [...prevDb.intense, ...grouped.intense]
+          }));
+
+          console.log(`✅ Loaded ${rows.length} WODs from Google Sheets`);
+        }
+      });
+    })
+    .catch(err => {
+      console.error("❌ Failed to load Google Sheet:", err);
+    });
+}, []);
 
   // Load saved state from localStorage
   useEffect(() => {
