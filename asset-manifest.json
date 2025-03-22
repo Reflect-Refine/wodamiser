@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/wodamiser/static/css/main.55322452.css",
-    "main.js": "/wodamiser/static/js/main.50168dc9.js",
+    "main.css": "/wodamiser/static/css/main.24bb159d.css",
+    "main.js": "/wodamiser/static/js/main.323d079a.js",
     "index.html": "/wodamiser/index.html",
-    "main.55322452.css.map": "/wodamiser/static/css/main.55322452.css.map",
-    "main.50168dc9.js.map": "/wodamiser/static/js/main.50168dc9.js.map"
+    "main.24bb159d.css.map": "/wodamiser/static/css/main.24bb159d.css.map",
+    "main.323d079a.js.map": "/wodamiser/static/js/main.323d079a.js.map"
   },
   "entrypoints": [
-    "static/css/main.55322452.css",
-    "static/js/main.50168dc9.js"
+    "static/css/main.24bb159d.css",
+    "static/js/main.323d079a.js"
   ]
 }
