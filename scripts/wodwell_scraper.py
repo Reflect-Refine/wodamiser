@@ -4,6 +4,7 @@ import requests
 import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+from bs4 import BeautifulSoup
 
 # -------------------------------
 # 📥 Load Google Sheets URL
@@ -45,6 +46,17 @@ def normalise_difficulty(levels):
         return "Intermediate"
     elif "beginner" in level:
         return "Beginner"
+    return ""
+
+def get_youtube_url(wod_url):
+    try:
+        res = requests.get(wod_url, headers=headers, timeout=10)
+        soup = BeautifulSoup(res.text, "html.parser")
+        iframe = soup.find("iframe", src=lambda x: x and "youtube.com/embed" in x)
+        if iframe:
+            return iframe["src"].replace("/embed/", "/watch?v=")
+    except Exception as e:
+        print(f"  ⚠️ Failed to fetch YouTube URL from {wod_url}: {e}")
     return ""
 
 # -------------------------------
@@ -91,6 +103,7 @@ for cat in categories:
                 "EstimatedTime": wod.get("time_cap", ""),
                 "Category": "regular",
                 "has_video": wod.get("has_video", False),
+                "videoUrl": get_youtube_url(url) if wod.get("has_video", False) else "",
                 "thumbnail": wod.get("thumbnail", ""),
                 "posted_by": wod.get("posted_by", {}).get("text", "")
             })
