@@ -27,6 +27,26 @@ jobs:
           touch build/.nojekyll
         env:
           CI: false
+          REACT_APP_GOOGLE_SHEETS_URL: ${{ secrets.GOOGLE_SHEETS_URL }}
+      - name: Setup Google credentials
+        run: |
+          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT }}' > ./service-account.json
+        shell: bash
+
+      - name: Setup Python 🐍
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies 📦
+        run: |
+          python -m pip install --upgrade pip
+          pip install gspread oauth2client pandas requests
+
+      - name: Run WOD scraper + Google Sheets upload 🏋️
+        run: python scripts/wodwell_scraper.py
+        env:
+          GOOGLE_SHEETS_URL: ${{ secrets.GOOGLE_SHEETS_URL }}
       - name: Check build output
         run: |
           echo "Checking build output..."

@@ -1,13 +1,13 @@
 // Google Sheets Integration for CrossFit WOD Randomiser
 
 // Replace with your published Google Sheet URL and Sheet ID
-const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/YOUR_SHEET_ID/pub?output=csv';
+const GOOGLE_SHEETS_URL = process.env.REACT_APP_GOOGLE_SHEETS_URL || 'fallback-url-for-development';
 
 // Function to fetch and parse workouts from Google Sheets
 export async function fetchWorkoutsFromGoogleSheets() {
   try {
     // Fetch the published CSV
-    const response = await fetch(GOOGLE_SHEET_URL);
+    const response = await fetch(GOOGLE_SHEETS_URL);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch Google Sheet: ${response.status}`);
