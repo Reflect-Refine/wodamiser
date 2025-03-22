@@ -1,59 +1,61 @@
 name: Deploy to GitHub Pages
+
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches:
+      - main
+
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pages: write
+
     steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v3
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-      - name: Install dependencies
-        run: |
-          npm install
-          npm ci
-      - name: Build
-        run: |
-          npm run build
-          touch build/.nojekyll
-        env:
-          CI: false
-          REACT_APP_GOOGLE_SHEETS_URL: ${{ secrets.GOOGLE_SHEETS_URL }}
-      - name: Setup Google credentials
-        run: |
-          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT }}' > ./service-account.json
-        shell: bash
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Setup Python 🐍
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+    # 🐍 Python setup for WOD scraper
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
 
-      - name: Install Python dependencies 📦
-        run: |
-          python -m pip install --upgrade pip
-          pip install gspread oauth2client pandas requests
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install beautifulsoup4 gspread oauth2client pandas requests
 
-      - name: Run WOD scraper + Google Sheets upload 🏋️
-        run: python scripts/wodwell_scraper.py
-        env:
-          GOOGLE_SHEETS_URL: ${{ secrets.GOOGLE_SHEETS_URL }}
-      - name: Check build output
-        run: |
-          echo "Checking build output..."
-          ls -la build/
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: build
-          branch: gh-pages
-          token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Setup Google credentials
+      run: |
+        echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT }}' > ./service-account.json
+
+    - name: Run the scraper script
+      run: python scripts/wodwell_scraper.py
+      env:
+        GOOGLE_SHEETS_URL: ${{ secrets.GOOGLE_SHEETS_URL }}
+
+    # ⚙️ Node setup for building the PWA
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install Node dependencies
+      run: npm ci
+
+    - name: Build the PWA
+      run: |
+        npm run build
+        touch build/.nojekyll
+      env:
+        CI: false
+        REACT_APP_GOOGLE_SHEETS_URL: ${{ secrets.GOOGLE_SHEETS_URL }}
+
+    # 🚀 Deploy to GitHub Pages
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build
+        publish_branch: gh-pages

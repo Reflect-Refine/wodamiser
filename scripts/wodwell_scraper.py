@@ -20,7 +20,13 @@ creds = ServiceAccountCredentials.from_json_keyfile_name(json_path, scope)
 client = gspread.authorize(creds)
 sheet = client.open_by_url(sheet_url)
 worksheet = sheet.sheet1
-worksheet.clear()
+existing_urls = set()
+try:
+    existing_data = worksheet.get_all_records()
+    existing_urls = {row["URL"] for row in existing_data if "URL" in row}
+    print(f"✅ Loaded {len(existing_urls)} existing WOD URLs from sheet")
+except Exception as e:
+    print(f"⚠️ Couldn't load existing WODs: {e}")
 
 # -------------------------------
 # 🔁 Scraper config
@@ -88,7 +94,7 @@ for cat in categories:
                 continue
 
             url = wod.get("url")
-            if url in seen_urls:
+            if url in seen_urls or url in existing_urls:
                 continue
 
             seen_urls.add(url)
@@ -105,7 +111,8 @@ for cat in categories:
                 "has_video": wod.get("has_video", False),
                 "videoUrl": get_youtube_url(url) if wod.get("has_video", False) else "",
                 "thumbnail": wod.get("thumbnail", ""),
-                "posted_by": wod.get("posted_by", {}).get("text", "")
+                "posted_by": wod.get("posted_by", {}).get("text", ""),
+                "URL": url,
             })
 
         print(f"  ➕ Added {new_count} new {cat['label']} WODs")
