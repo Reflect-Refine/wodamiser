@@ -6,6 +6,17 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from bs4 import BeautifulSoup
 
+def get_youtube_url(wod_url):
+    try:
+        res = requests.get(wod_url, headers=headers, timeout=10)
+        soup = BeautifulSoup(res.text, "html.parser")
+        iframe = soup.find("iframe", src=lambda x: x and "youtube.com/embed" in x)
+        if iframe:
+            return iframe["src"].replace("/embed/", "/watch?v=")
+    except Exception as e:
+        print(f"  ⚠️ Failed to fetch YouTube URL from {wod_url}: {e}")
+    return ""
+
 # -------------------------------
 # 📥 Load Google Sheets URL
 # -------------------------------
@@ -54,16 +65,6 @@ def normalise_difficulty(levels):
         return "Beginner"
     return ""
 
-def get_youtube_url(wod_url):
-    try:
-        res = requests.get(wod_url, headers=headers, timeout=10)
-        soup = BeautifulSoup(res.text, "html.parser")
-        iframe = soup.find("iframe", src=lambda x: x and "youtube.com/embed" in x)
-        if iframe:
-            return iframe["src"].replace("/embed/", "/watch?v=")
-    except Exception as e:
-        print(f"  ⚠️ Failed to fetch YouTube URL from {wod_url}: {e}")
-    return ""
 
 # -------------------------------
 # 🔍 Scrape all WODs by category
@@ -94,8 +95,8 @@ for cat in categories:
                 continue
 
             url = wod.get("url")
-            if url in seen_urls or url in existing_urls:
-                continue
+            # if url in seen_urls or url in existing_urls:
+            #     continue
 
             seen_urls.add(url)
             new_count += 1
